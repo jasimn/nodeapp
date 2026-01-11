@@ -6,6 +6,10 @@ pipeline {
     ACCOUNT_ID = "194273216057"
     ECR_REPO   = "mynodeapp"
     IMAGE_URI  = "${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/${ECR_REPO}"
+    APP_NAME   = "nodeapp"
+    DEPLOYMENT = "nodeapp-deploy"
+    SERVICE    = "nodeapp-service"
+    NAMESPACE  = "default"
   }
 
   stages {
@@ -47,12 +51,64 @@ pipeline {
       }
     }
 
-    stage('Deploy to EKS') {
+    stage('Create Deployment if Not Exists') {
       steps {
         sh '''
-        kubectl get deployments
-        kubectl set image deployment/nodeapp-deploy \
-        nodeapp=$IMAGE_URI:${BUILD_NUMBER}
+        kubectl get deployment $DEPLOYMENT -n $NAMESPACE \
+        || kubectl apply -f - <<EOF
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: $DEPLOYMENT
+  namespace: $NAMESPACE
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: $APP_NAME
+  template:
+    metadata:
+      labels:
+        app: $APP_NAME
+    spec:
+      containers:
+      - name: $APP_NAME
+        image: $IMAGE_URI:${BUILD_NUMBER}
+        ports:
+        - containerPort: 3000
+EOF
+        '''
+      }
+    }
+
+    stage('Create Service if Not Exists') {
+      steps {
+        sh '''
+        kubectl get service $SERVICE -n $NAMESPACE \
+        || kubectl apply -f - <<EOF
+apiVersion: v1
+kind: Service
+metadata:
+  name: $SERVICE
+  namespace: $NAMESPACE
+spec:
+  selector:
+    app: $APP_NAME
+  ports:
+  - port: 80
+    targetPort: 3000
+  type: ClusterIP
+EOF
+        '''
+      }
+    }
+
+    stage('Deploy to EKS (Rolling Update)') {
+      steps {
+        sh '''
+        kubectl set image deployment/$DEPLOYMENT \
+        $APP_NAME=$IMAGE_URI:${BUILD_NUMBER} \
+        -n $NAMESPACE
         '''
       }
     }
