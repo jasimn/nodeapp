@@ -10,6 +10,19 @@ pipeline {
 
   stages {
 
+    stage('Ensure ECR Repository') {
+      steps {
+        sh '''
+        aws ecr describe-repositories \
+          --repository-names $ECR_REPO \
+          --region $REGION \
+        || aws ecr create-repository \
+          --repository-name $ECR_REPO \
+          --region $REGION
+        '''
+      }
+    }
+
     stage('Build Docker Image') {
       steps {
         sh 'docker build -t mynodeapp:${BUILD_NUMBER} mynodeapp'
@@ -25,7 +38,7 @@ pipeline {
       }
     }
 
-    stage('Push Image') {
+    stage('Push Image to ECR') {
       steps {
         sh '''
         docker tag mynodeapp:${BUILD_NUMBER} $IMAGE_URI:${BUILD_NUMBER}
