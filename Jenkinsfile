@@ -2,10 +2,10 @@ pipeline {
   agent any
 
   environment {
-    REGION = "us-east-1"
+    REGION     = "us-east-1"
     ACCOUNT_ID = "194273216057"
-    ECR_REPO = "mynodeapp"
-    IMAGE_URI = "${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/${ECR_REPO}"
+    ECR_REPO   = "mynodeapp"
+    IMAGE_URI  = "${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/${ECR_REPO}"
   }
 
   stages {
@@ -50,7 +50,8 @@ pipeline {
     stage('Deploy to EKS') {
       steps {
         sh '''
-        kubectl set image deployment/nodeapp \
+        kubectl get deployments
+        kubectl set image deployment/nodeapp-deploy \
         nodeapp=$IMAGE_URI:${BUILD_NUMBER}
         '''
       }
