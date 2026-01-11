@@ -10,16 +10,9 @@ pipeline {
 
   stages {
 
-    stage('Checkout') {
-      steps {
-        git branch: 'main',
-            url: 'https://github.com/jasimn/nodeapp.git'
-      }
-    }
-
     stage('Build Docker Image') {
       steps {
-         sh 'docker build -t mynodeapp:${BUILD_NUMBER} mynodeapp'
+        sh 'docker build -t mynodeapp:${BUILD_NUMBER} mynodeapp'
       }
     }
 
