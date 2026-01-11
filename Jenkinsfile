@@ -89,15 +89,15 @@ EOF
 apiVersion: v1
 kind: Service
 metadata:
-  name: $SERVICE
-  namespace: $NAMESPACE
+  name: nodeapp-service
+  namespace: default
 spec:
+  type: LoadBalancer
   selector:
-    app: $APP_NAME
+    app: nodeapp
   ports:
   - port: 80
     targetPort: 3000
-  type: ClusterIP
 EOF
         '''
       }
