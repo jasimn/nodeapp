@@ -13,7 +13,7 @@ pipeline {
     stage('Checkout') {
       steps {
         git branch: 'main',
-            url: 'https://github.com/yourrepo/mynodeapp.git'
+            url: 'https://github.com/jasimn/nodeapp.git'
       }
     }
 
