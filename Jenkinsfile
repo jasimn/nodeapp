@@ -1,16 +1,4 @@
-pipeline {
-  agent any
 
-  environment {
-    REGION     = "us-east-1"
-    ACCOUNT_ID = "194273216057"
-    ECR_REPO   = "mynodeapp"
-    IMAGE_URI  = "${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com/${ECR_REPO}"
-    APP_NAME   = "nodeapp"
-    DEPLOYMENT = "nodeapp-deploy"
-    SERVICE    = "nodeapp-service"
-    NAMESPACE  = "default"
-  }
 
   stages {
 
